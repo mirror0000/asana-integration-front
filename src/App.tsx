@@ -46,7 +46,7 @@ function App() {
                 <Route path="/callback" element={<AsanaCallback />} />
                 <Route path="/projects" element={<Portals />} />
                 {/* <Route path="/portals/:portalId/projects/:projectId/tasks" element={<ProjectTasks />} /> */}
-                <Route path="/portals/:listID/tasks" element={<ProjectTasks />} />
+                <Route path="/portals/:projectId/tasks" element={<ProjectTasks />} />
                 <Route path=":portalId/projects" element={<Projects />} />
             </Routes>
             <ToastContainer />

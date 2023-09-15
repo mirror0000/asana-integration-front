@@ -7,16 +7,17 @@ type ITaskTimeLogProps = {
     showModal: boolean,
     setShowModal: any,
     taskData: any,
-    listID: string
+    listID: string,
+    sectionOption: any[],
 }
 type IFormDataInterface = {
     duration: string;
-    billable: string;
+    status: string;
     description: string;
 }
 
 
-const TaskTimelogModal = ({ showModal, setShowModal, taskData, listID }: ITaskTimeLogProps) => {
+const TaskTimelogModal = ({ showModal, setShowModal, taskData, listID, sectionOption }: ITaskTimeLogProps) => {
     const [submitLoading, setSubmitLoading] = useState<boolean>(false)
     const [accessToken, setAccessToken] = useLocalStorage("access_token", "");
 
@@ -24,13 +25,13 @@ const TaskTimelogModal = ({ showModal, setShowModal, taskData, listID }: ITaskTi
 
     const [formData, setFormData] = useState<IFormDataInterface | any>({
         duration: "",
-        billable: "",
+        status: listID,
         description: "",
     });
 
     const [errors, setErrors] = useState<IFormDataInterface | any>({
         duration: "",
-        billable: "",
+        status: "",
         description: "",
     });
     const OnFormInputChange = (e: any) => {
@@ -47,7 +48,8 @@ const TaskTimelogModal = ({ showModal, setShowModal, taskData, listID }: ITaskTi
 
     const handleAddTimeLog = async (e:any) => {
         e.preventDefault()
-        const fields = ["duration", "billable", "description"];
+        const fields = ["duration", "description"];
+        
         let customError: any = {};
         for (const field of fields) {
             if (field !== 'notes' && !formData[field] ) {
@@ -59,11 +61,11 @@ const TaskTimelogModal = ({ showModal, setShowModal, taskData, listID }: ITaskTi
             return;
         }
         console.log("🚀 ~ file: index.tsx:58 ~ handleAddTimeLog ~ return:", taskData)
-        // const { duration, billable, description } = formData;
+        // const { duration, status, description } = formData;
 
         // const body = {
         //     duration, 
-        //     billable, 
+        //     status, 
         //     description, 
         //     assignee: taskData?.assignees[0]?.id,
         //     tid: taskData?.id,
@@ -74,6 +76,9 @@ const TaskTimelogModal = ({ showModal, setShowModal, taskData, listID }: ITaskTi
         setSubmitLoading(true);
         try {
             console.log('submit formdata', formData);
+            if (!formData.status) {
+                formData.status = listID;
+            }
             const result: any = await axios.post(
                 `${process.env.REACT_APP_BACKEND_API}/portals/${taskData?.gid}/log`,
                 formData,
@@ -90,7 +95,7 @@ const TaskTimelogModal = ({ showModal, setShowModal, taskData, listID }: ITaskTi
                 setTimeout(() => {
                     setFormData({
                         date: "",
-                        bill_status: "",
+                        task_status: "",
                         hours: "",
                         notes: "",
                     });
@@ -137,17 +142,19 @@ const TaskTimelogModal = ({ showModal, setShowModal, taskData, listID }: ITaskTi
                                 <span className="mt-2 text-sm text-red-500 dark:text-red-400">{errors?.duration}</span>
                             </div>
                             <div className="flex flex-col items-start mb-3">
-                                <label htmlFor="bill_status" className="label p-0 mb-[0.5rem] dark:text-slate-400">Bill Status:<span className='text-sm text-red-500'>*</span></label>
+                                <label htmlFor="task_status" className="label p-0 mb-[0.5rem] dark:text-slate-400">Status:<span className='text-sm text-red-500'>*</span></label>
                                 <select
-                                    value={formData.billable}
+                                    value={formData.status ? formData.status : listID}
                                     onChange={OnFormInputChange}
-                                    name="billable"
-                                    id="bill_status" className="rounded-lg h-[40px] w-full py-2 px-5 dark:bg-slate-800/60 dark:border-slate-700/50 focus:outline-none">
-                                    <option value="">Select Bill Status</option>
-                                    <option value="true">Non Billable</option>
-                                    <option value="false">Billable</option>
+                                    name="status"
+                                    id="task_status" className="rounded-lg h-[40px] w-full py-2 px-5 dark:bg-slate-800/60 dark:border-slate-700/50 focus:outline-none">
+                                    {
+                                        sectionOption && sectionOption?.map((item: any) => (
+                                            <option value={item.id}>{item.name}</option>
+                                        ))
+                                    }
                                 </select>
-                                <span className="mt-2 text-sm text-red-500 dark:text-red-400">{errors?.bill_status}</span>
+                                <span className="mt-2 text-sm text-red-500 dark:text-red-400">{errors?.task_status}</span>
                             </div>
                             <div className="flex flex-col items-start mb-3">
                                 <label htmlFor="notes"
